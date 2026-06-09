@@ -1,0 +1,4 @@
+node_modules/
+sessions/
+config/*.local.json
+*.log
