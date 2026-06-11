@@ -11,14 +11,39 @@ This project starts small on purpose. Version `v0.1.0` is focused on the basic h
 - future tool registry for file and shell tools
 - future OpenAI-compatible model provider
 
-## Day 1 Status
+## Current Status
 
-The current build is a project skeleton with a runnable CLI, config loading, and session persistence.
+The current build is an early alpha with a runnable CLI, config loading, session persistence, and an OpenAI-compatible model provider boundary.
 
 ```bash
 npm run doctor
 npm run prompt -- "hello"
 ```
+
+If no model server is running, `prompt` prints a clear provider error instead of hanging indefinitely.
+
+## Configuration
+
+Defaults are built into `src/config/loadConfig.js`. To override them locally, create:
+
+```text
+config/qwen-harness.json
+```
+
+Use `config/qwen-harness.example.json` as the template:
+
+```json
+{
+  "workspaceRoot": "E:/Harness/Project",
+  "sessionDir": "E:/Harness/Project/sessions",
+  "modelEndpoint": "http://localhost:8080/v1/chat/completions",
+  "modelName": "qwen2.5-coder-7b-instruct",
+  "modelTimeoutMs": 5000,
+  "approvalMode": "ask"
+}
+```
+
+The model endpoint can point to a local or remote OpenAI-compatible server.
 
 ## Design Reference
 

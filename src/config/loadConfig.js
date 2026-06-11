@@ -12,6 +12,7 @@ export async function loadConfig() {
     sessionDir: join(projectRoot, "sessions"),
     modelEndpoint: "http://localhost:8080/v1/chat/completions",
     modelName: "qwen2.5-coder-7b-instruct",
+    modelTimeoutMs: 5000,
     approvalMode: "ask"
   };
 

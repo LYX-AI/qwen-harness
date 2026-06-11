@@ -24,6 +24,7 @@ async function main() {
     console.log(`sessionDir: ${config.sessionDir}`);
     console.log(`modelEndpoint: ${config.modelEndpoint}`);
     console.log(`modelName: ${config.modelName}`);
+    console.log(`modelTimeoutMs: ${config.modelTimeoutMs}`);
     console.log(`latestSession: ${session.id}`);
     return;
   }
