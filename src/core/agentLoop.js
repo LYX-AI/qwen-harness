@@ -1,3 +1,5 @@
+import { callOpenAICompatibleProvider } from "../provider/openaiCompatibleProvider.js";
+
 export async function runAgentTurn({ prompt, config, session, store }) {
   const userMessage = {
     role: "user",
@@ -7,13 +9,28 @@ export async function runAgentTurn({ prompt, config, session, store }) {
 
   await store.appendMessage(session.id, userMessage);
 
+  let providerResult;
+  try {
+    providerResult = await callOpenAICompatibleProvider({
+      config,
+      messages: [...session.messages, userMessage]
+    });
+  } catch (error) {
+    providerResult = {
+      text: [
+      "Model provider is not reachable yet.",
+      `Endpoint: ${config.modelEndpoint}`,
+      `Error kind: ${error?.kind ?? "unknown"}`,
+      `Reason: ${error instanceof Error ? error.message : String(error)}`,
+      "",
+      "This is expected until a local OpenAI-compatible model server is running."
+      ].join("\n")
+    };
+  }
+
   const assistantMessage = {
     role: "assistant",
-    content: [
-      "Day 1 harness loop is running.",
-      "Model provider and tool execution are intentionally not connected yet.",
-      `Configured model endpoint: ${config.modelEndpoint}`
-    ].join("\n"),
+    content: providerResult.text,
     createdAt: new Date().toISOString()
   };
 
