@@ -3,6 +3,7 @@
 import { runAgentTurn } from "../core/agentLoop.js";
 import { loadConfig } from "../config/loadConfig.js";
 import { createSessionStore } from "../session/store.js";
+import { executeTool, listTools } from "../tools/registry.js";
 
 const args = process.argv.slice(2);
 const command = args[0] ?? "help";
@@ -25,7 +26,38 @@ async function main() {
     console.log(`modelEndpoint: ${config.modelEndpoint}`);
     console.log(`modelName: ${config.modelName}`);
     console.log(`modelTimeoutMs: ${config.modelTimeoutMs}`);
+    console.log(`tools: ${listTools().map((tool) => tool.name).join(", ")}`);
     console.log(`latestSession: ${session.id}`);
+    return;
+  }
+
+  if (command === "tool") {
+    const toolName = args[1];
+    if (!toolName) {
+      console.error("Usage: qwen-harness tool <tool-name> [path]");
+      process.exitCode = 1;
+      return;
+    }
+
+    const config = await loadConfig();
+    const store = createSessionStore(config.sessionDir);
+    const session = await store.getOrCreateLatestSession(config);
+    const input = { path: args[2] ?? "." };
+    const result = await executeTool({
+      name: toolName,
+      input,
+      config
+    });
+
+    await store.appendToolCall(session.id, {
+      toolName,
+      input,
+      result,
+      status: "success",
+      createdAt: new Date().toISOString()
+    });
+
+    console.log(JSON.stringify(result, null, 2));
     return;
   }
 
@@ -56,10 +88,12 @@ function printHelp() {
 
 Usage:
   qwen-harness doctor
+  qwen-harness tool list_directory [path]
   qwen-harness prompt "your request"
 
 Day 1 commands:
   doctor   Print config and session status
+  tool     Run a registered tool manually
   prompt   Run one placeholder agent turn and save it to the latest session
 `);
 }

@@ -26,6 +26,16 @@ export function createSessionStore(sessionDir) {
       session.updatedAt = new Date().toISOString();
       await writeSession(sessionDir, session);
       return session;
+    },
+
+    async appendToolCall(sessionId, toolCall) {
+      const path = join(sessionDir, `${sessionId}.json`);
+      const session = JSON.parse(await readFile(path, "utf8"));
+      session.toolCalls ??= [];
+      session.toolCalls.push(toolCall);
+      session.updatedAt = new Date().toISOString();
+      await writeSession(sessionDir, session);
+      return session;
     }
   };
 }
@@ -41,7 +51,8 @@ function createSession(config) {
     workspaceRoot: config.workspaceRoot,
     createdAt: now.toISOString(),
     updatedAt: now.toISOString(),
-    messages: []
+    messages: [],
+    toolCalls: []
   };
 }
 
