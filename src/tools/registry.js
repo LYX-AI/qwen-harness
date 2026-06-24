@@ -1,7 +1,9 @@
 import { listDirectoryTool } from "./listDirectory.js";
+import { readFileTool } from "./readFile.js";
 
 const tools = new Map([
-  [listDirectoryTool.name, listDirectoryTool]
+  [listDirectoryTool.name, listDirectoryTool],
+  [readFileTool.name, readFileTool]
 ]);
 
 export function getTool(name) {

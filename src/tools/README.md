@@ -16,5 +16,6 @@ Current implementation:
 
 - `registry.js` registers and executes tools by name.
 - `listDirectory.js` implements the first read-only tool.
+- `readFile.js` reads UTF-8 text files inside the workspace with a basic size limit.
 - `pathSafety.js` ensures requested paths stay inside the configured workspace.
 - `errors.js` defines `ToolError` for tool-layer failures.
