@@ -13,6 +13,7 @@ export async function loadConfig() {
     modelEndpoint: "http://localhost:8080/v1/chat/completions",
     modelName: "qwen2.5-coder-7b-instruct",
     modelTimeoutMs: 5000,
+    maxFileReadBytes: 65536,
     approvalMode: "ask"
   };
 

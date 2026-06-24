@@ -89,6 +89,7 @@ function printHelp() {
 Usage:
   qwen-harness doctor
   qwen-harness tool list_directory [path]
+  qwen-harness tool read_file <path>
   qwen-harness prompt "your request"
 
 Day 1 commands:
