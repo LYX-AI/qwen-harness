@@ -42,7 +42,17 @@ async function main() {
     const config = await loadConfig();
     const store = createSessionStore(config.sessionDir);
     const session = await store.getOrCreateLatestSession(config);
-    const input = { path: args[2] ?? "." };
+    let input;
+    if (toolName === "search_files") {
+      input = {
+        query: args[2],
+        path: args[3] ?? "."
+      };
+    } else {
+      input = {
+        path: args[2] ?? "."
+      };
+    }
     const result = await executeTool({
       name: toolName,
       input,
@@ -90,6 +100,7 @@ Usage:
   qwen-harness doctor
   qwen-harness tool list_directory [path]
   qwen-harness tool read_file <path>
+  qwen-harness tool search_files <query> [path]
   qwen-harness prompt "your request"
 
 Day 1 commands:
