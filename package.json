@@ -9,7 +9,8 @@
   "scripts": {
     "start": "node ./src/cli/index.js",
     "doctor": "node ./src/cli/index.js doctor",
-    "prompt": "node ./src/cli/index.js prompt"
+    "prompt": "node ./src/cli/index.js prompt",
+    "test": "node --test"
   },
   "engines": {
     "node": ">=22"
