@@ -1,6 +1,7 @@
 import { listDirectoryTool } from "./listDirectory.js";
 import { readFileTool } from "./readFile.js";
 import { searchFilesTool } from "./searchFiles.js";
+import { enforceApproval } from "../approval/gate.js";
 
 const tools = new Map([
   [listDirectoryTool.name, listDirectoryTool],
@@ -20,12 +21,24 @@ export function listTools() {
   }));
 }
 
-export async function executeTool({ name, input, config }) {
+export async function executeTool({
+  name,
+  input,
+  config,
+  requestApproval
+}) {
   const tool = getTool(name);
 
   if (!tool) {
     throw new Error(`Unknown tool: ${name}`);
   }
+
+  await enforceApproval({
+    tool,
+    input,
+    approvalMode: config.approvalMode,
+    requestApproval
+  });
 
   return tool.execute({ input, config });
 }

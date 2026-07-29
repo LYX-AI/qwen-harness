@@ -11,8 +11,9 @@ Version `v0.1.0` is focused on the basic harness shape:
 - local session storage
 - local config loading
 - OpenAI-compatible model provider boundary
-- read-only tool registry
+- centralized tool registry
 - workspace path safety
+- permission decisions and approval enforcement
 
 ## Current Status
 
@@ -23,13 +24,20 @@ The current build is an early alpha with:
 - local JSON session persistence
 - OpenAI-compatible model provider boundary
 - provider timeout and classified provider errors
-- a read-only `list_directory` tool
+- read-only `list_directory`, `read_file`, and `search_files` tools
+- workspace path safety and file-size limits
+- an `allow / ask / deny` approval policy
+- an approval gate enforced before registered tools execute
+- automated policy, gate, and registry tests
 - tool call traces saved into the current session
 
 ```bash
 npm run doctor
 npm run prompt -- "hello"
 node ./src/cli/index.js tool list_directory .
+node ./src/cli/index.js tool read_file package.json
+node ./src/cli/index.js tool search_files executeTool src
+npm test
 ```
 
 If no model server is running, `prompt` prints a clear provider error instead of hanging indefinitely.
@@ -40,9 +48,36 @@ If no model server is running, `prompt` prints a clear provider error instead of
 node ./src/cli/index.js doctor
 node ./src/cli/index.js prompt "your request"
 node ./src/cli/index.js tool list_directory [path]
+node ./src/cli/index.js tool read_file <path>
+node ./src/cli/index.js tool search_files <query> [path]
 ```
 
-`list_directory` only reads paths inside the configured workspace. Attempts to escape the workspace, such as `..`, are rejected.
+The current tools only read paths inside the configured workspace. Attempts to
+escape the workspace, such as `..`, are rejected. File reads and searches also
+use size and result limits to avoid returning unbounded content.
+
+## Approval Boundary
+
+Every registered tool now passes through the approval gate before its
+`execute()` method can run:
+
+```text
+executeTool()
+  -> enforceApproval()
+  -> evaluateApproval()
+  -> allow: continue
+  -> ask: require an explicit approval callback
+  -> deny: stop with an error
+  -> tool.execute()
+```
+
+Read-only tools are allowed without prompting. Mutating tools can be allowed,
+denied, or delegated to a caller-provided approval handler according to
+`approvalMode`.
+
+The approval handler is intentionally separate from the gate. The current CLI
+does not yet provide an interactive `y/N` prompt, and no mutating tool is
+registered yet.
 
 ## Configuration
 
@@ -75,6 +110,7 @@ This project studies architecture ideas from `claude-code-analysis`, especially:
 - central query / agent loop
 - explicit session and config layers
 - tool registry as the boundary between model intent and real actions
+- permission-first execution before tools can affect the workspace
 
 It does not copy implementation code.
 
@@ -83,14 +119,25 @@ It does not copy implementation code.
 - Local-first: the first version works as a single-user local developer tool.
 - Tool-boundary first: external actions go through registered tools.
 - Read-only before mutating: file reads and searches come before edits or shell execution.
+- Permission-first: registered tools pass through one approval boundary before execution.
 - Traceable execution: messages and tool calls are saved into local sessions.
 - Small releases: each milestone adds one understandable capability.
+
+## Current Limitations
+
+- No `edit_file` tool.
+- No `run_shell` tool.
+- No interactive CLI approval prompt.
+- The model does not yet select and invoke tools automatically.
+- Session traces do not yet include approval decisions.
 
 ## Roadmap
 
 - `04A`: add `list_directory` read-only tool. Done.
 - `04B`: document current harness capabilities. Done.
-- `05A`: add `read_file` with workspace safety and basic size limits.
-- `05B`: document read-only file access design.
-- `06A`: add simple `search_files`.
-- `07A`: add approval policy foundation before mutating tools.
+- `05A`: add `read_file` with workspace safety and basic size limits. Done.
+- `05B`: document read-only file access design. Done.
+- `06A`: add simple `search_files`. Done.
+- `07A`: add approval policy foundation before mutating tools. Done.
+- `07B`: enforce approval decisions at the tool registry boundary. Done.
+- `08`: add a controlled `edit_file` tool.
