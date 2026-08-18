@@ -14,6 +14,7 @@ export async function loadConfig() {
     modelName: "qwen2.5-coder-7b-instruct",
     modelTimeoutMs: 5000,
     maxFileReadBytes: 65536,
+    maxFileEditBytes: 65536,
     approvalMode: "ask"
   };
 

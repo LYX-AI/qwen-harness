@@ -25,10 +25,12 @@ The current build is an early alpha with:
 - OpenAI-compatible model provider boundary
 - provider timeout and classified provider errors
 - read-only `list_directory`, `read_file`, and `search_files` tools
+- a controlled `edit_file` mutating tool
 - workspace path safety and file-size limits
 - an `allow / ask / deny` approval policy
 - an approval gate enforced before registered tools execute
-- automated policy, gate, and registry tests
+- a CLI `y/n` approval prompt for mutating tools
+- automated policy, gate, registry, and `edit_file` tests
 - tool call traces saved into the current session
 
 ```bash
@@ -37,6 +39,7 @@ npm run prompt -- "hello"
 node ./src/cli/index.js tool list_directory .
 node ./src/cli/index.js tool read_file package.json
 node ./src/cli/index.js tool search_files executeTool src
+node ./src/cli/index.js tool edit_file README.md "old text" "new text"
 npm test
 ```
 
@@ -50,11 +53,16 @@ node ./src/cli/index.js prompt "your request"
 node ./src/cli/index.js tool list_directory [path]
 node ./src/cli/index.js tool read_file <path>
 node ./src/cli/index.js tool search_files <query> [path]
+node ./src/cli/index.js tool edit_file <path> <oldText> <newText> [--replace-all]
 ```
 
-The current tools only read paths inside the configured workspace. Attempts to
-escape the workspace, such as `..`, are rejected. File reads and searches also
-use size and result limits to avoid returning unbounded content.
+Read-only tools inspect paths inside the configured workspace. `edit_file`
+replaces exact text in a workspace file after approval. Attempts to escape the
+workspace, such as `..`, are rejected. File reads, searches, and edits also use
+size and result limits to avoid returning or rewriting unbounded content.
+
+In default `ask` mode, `edit_file` prints the tool name, reason, and input, then
+waits for `y` or `n`. Only `y` allows the write.
 
 ## Approval Boundary
 
@@ -75,9 +83,9 @@ Read-only tools are allowed without prompting. Mutating tools can be allowed,
 denied, or delegated to a caller-provided approval handler according to
 `approvalMode`.
 
-The approval handler is intentionally separate from the gate. The current CLI
-does not yet provide an interactive `y/N` prompt, and no mutating tool is
-registered yet.
+The approval handler is intentionally separate from the gate. The CLI supplies a
+`requestApproval` function that asks `y/n` in the terminal. Tests inject their
+own handler so they can approve or deny without waiting for keyboard input.
 
 ## Configuration
 
@@ -96,6 +104,8 @@ Use `config/qwen-harness.example.json` as the template:
   "modelEndpoint": "http://localhost:8080/v1/chat/completions",
   "modelName": "qwen2.5-coder-7b-instruct",
   "modelTimeoutMs": 5000,
+  "maxFileReadBytes": 65536,
+  "maxFileEditBytes": 65536,
   "approvalMode": "ask"
 }
 ```
@@ -125,11 +135,10 @@ It does not copy implementation code.
 
 ## Current Limitations
 
-- No `edit_file` tool.
 - No `run_shell` tool.
-- No interactive CLI approval prompt.
 - The model does not yet select and invoke tools automatically.
 - Session traces do not yet include approval decisions.
+- `edit_file` replaces exact strings only; it does not apply patches or regex.
 
 ## Roadmap
 
@@ -140,4 +149,5 @@ It does not copy implementation code.
 - `06A`: add simple `search_files`. Done.
 - `07A`: add approval policy foundation before mutating tools. Done.
 - `07B`: enforce approval decisions at the tool registry boundary. Done.
-- `08`: add a controlled `edit_file` tool.
+- `08`: add a controlled `edit_file` tool. Done.
+- `09`: add a controlled `run_shell` tool.

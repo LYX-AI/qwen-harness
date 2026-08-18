@@ -4,6 +4,25 @@ import { runAgentTurn } from "../core/agentLoop.js";
 import { loadConfig } from "../config/loadConfig.js";
 import { createSessionStore } from "../session/store.js";
 import { executeTool, listTools } from "../tools/registry.js";
+import { createInterface } from "node:readline/promises";
+
+async function requestCliApproval({tool,input,reason}){
+  const rl = createInterface({
+    input: process.stdin,
+    output: process.stderr
+  });
+
+  try{
+    console.error(`Approval required:${tool.name}`);
+    console.error(reason);
+    console.error(JSON.stringify(input,null,2));
+    const answer = await rl.question("Do you approve? (y/n):");
+    return answer.trim().toLowerCase() === "y";
+  } finally {
+    rl.close();
+  }
+}
+
 
 const args = process.argv.slice(2);
 const command = args[0] ?? "help";
@@ -48,7 +67,15 @@ async function main() {
         query: args[2],
         path: args[3] ?? "."
       };
-    } else {
+    } else if (toolName === "edit_file") {
+      input = {
+        path: args[2],
+        oldText: args[3],
+        newText: args[4],
+        replaceAll: args[5] === "--replace-all"
+      };
+    }
+      else {
       input = {
         path: args[2] ?? "."
       };
@@ -56,7 +83,8 @@ async function main() {
     const result = await executeTool({
       name: toolName,
       input,
-      config
+      config,
+      requestApproval: requestCliApproval
     });
 
     await store.appendToolCall(session.id, {
@@ -101,6 +129,7 @@ Usage:
   qwen-harness tool list_directory [path]
   qwen-harness tool read_file <path>
   qwen-harness tool search_files <query> [path]
+  qwen-harness tool edit_file <path> <oldText> <newText> [--replace-all]
   qwen-harness prompt "your request"
 
 Day 1 commands:
