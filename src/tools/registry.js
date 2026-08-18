@@ -2,11 +2,13 @@ import { listDirectoryTool } from "./listDirectory.js";
 import { readFileTool } from "./readFile.js";
 import { searchFilesTool } from "./searchFiles.js";
 import { enforceApproval } from "../approval/gate.js";
+import {editFileTool} from "./editFile.js";
 
 const tools = new Map([
   [listDirectoryTool.name, listDirectoryTool],
   [readFileTool.name, readFileTool],
-  [searchFilesTool.name, searchFilesTool]
+  [searchFilesTool.name, searchFilesTool],
+  [editFileTool.name, editFileTool]
 ]);
 
 export function getTool(name) {
