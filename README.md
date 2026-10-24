@@ -1,5 +1,9 @@
 # Qwen Harness
 
+## Agent learning module
+
+The repository now includes a standalone [smolagents investing assistant](agent/investing-assistant/README.md): a terminal demo that calls a deterministic purchase-preview tool through a `CodeAgent`. This is the first learning milestone toward a beginner investment research application. The Python module is not yet integrated with the Node.js harness.
+
 A local-first terminal coding harness for Qwen coder models.
 
 Qwen Harness is being built as a small, serious AI coding harness rather than a chatbot wrapper. The goal is to wrap an open or low-cost coding model with controlled tools, local sessions, and clear execution boundaries.
