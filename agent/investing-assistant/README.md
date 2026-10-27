@@ -2,7 +2,7 @@
 
 这个终端教学示例使用 smolagents 和智谱 GLM，将人民币预算、用户提供的汇率与股价转换为整股购买预览。模型生成工具调用代码，Python 工具计算金额，Agent 根据结果给出最终回答。
 
-当前是 Harness 仓库内独立的 Python 模块；UI、实时数据、模拟账户与 Node.js 集成将在后续逐步开发。
+当前是 Harness 仓库内独立的 Python 模块；第二期 UI 已接入输入校验、确定性购买计算和 Agent 解释。实时数据、模拟账户与 Node.js 集成将在后续逐步开发。
 
 ## 环境与安装
 
@@ -14,6 +14,24 @@
 py -m venv .venv
 .\.venv\Scripts\python.exe -m pip install -r requirements.txt
 ```
+
+## 第二期 UI 页面
+
+运行 `ui.py`，在浏览器打开购买预览页面：
+
+```powershell
+.\.venv\Scripts\python.exe ui.py
+```
+
+页面包含人民币预算、人民币兑美元汇率和美元股价输入框，以及计算结果和 Agent 解释区域。点击按钮后，页面先校验输入，再调用 `calculate_purchase` 生成数字结果，随后尝试运行 CodeAgent。模型调用失败时，计算结果仍会显示，解释区会提示暂时不可用；详细错误只记在本地终端日志中。汇率和股价由用户输入，并非实时行情。
+
+不调用真实模型也可以运行回归测试：
+
+```powershell
+.\.venv\Scripts\python.exe -m unittest discover -s tests -v
+```
+
+测试覆盖正常输入、无效输入、预算不足买一股和模型失败时保留计算结果。真实模型与工具调用轨迹仍需在配置好 `GLM_API_KEY` 的终端中启动页面后手动验证。
 
 在智谱开放平台创建 API Key，然后在运行程序的同一个终端设置：
 
@@ -83,4 +101,4 @@ VS Code 如提示找不到 smolagents，请在 Python: Select Interpreter 中选
 
 CodeAgent 默认执行器在本地运行生成代码，不能据此将其视为生产安全沙箱。现阶段仅注册此计算工具。
 
-下一步先完成第一期教学视频，再增加简单输入界面与结果卡片。后续逐步加入数据工具、模拟账户、错误处理与 Harness 集成。
+第一期教学视频已录制，剪辑与发布状态另记。第二期 UI 已接入计算与 Agent；真实模型运行验收尚未完成。后续逐步加入数据工具、模拟账户、错误处理与 Harness 集成。
