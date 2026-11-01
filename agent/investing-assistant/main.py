@@ -11,6 +11,8 @@ def create_agent():
         model_id="glm-4.7-flash",
         api_base="https://open.bigmodel.cn/api/paas/v4",
         api_key=api_key,
+        client_kwargs={"timeout": 30.0, "max_retries": 0},
+        retry=False,
     )
 
     return CodeAgent(
@@ -21,6 +23,7 @@ def create_agent():
             "必须调用 preview_purchase 工具恰好一次。"
             "不得在生成代码中自行重做这项计算。"
             "最终回答必须依据工具返回的结果。"
+            "最终回答使用简短自然中文，不要直接输出字典、JSON 或代码。"
         ),
         max_steps=3,
         code_block_tags="markdown",

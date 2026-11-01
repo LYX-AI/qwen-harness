@@ -1,4 +1,11 @@
 from decimal import Decimal
+"""
+1.传入本金
+2.本金-》美元
+3.美元/股价=最大可买股数
+4.最大可买股数*股价=总花费
+5.本金-总花费=剩余本金
+"""
 def calculate_purchase(budget_cny,cny_per_usd,price_usd):
     if budget_cny <= 0 or cny_per_usd <= 0 or price_usd <= 0:
         raise ValueError("Budget, CNY per USD, and price in USD must all be greater than zero.")
